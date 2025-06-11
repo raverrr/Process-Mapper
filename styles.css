@@ -1,0 +1,509 @@
+/* Import Roboto font and Material Icons */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:root {
+  --canvasHeight: 60vh; /* 3/4 of the viewport height */
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #121212; /* Dark background */
+  color: #E0E0E0; /* Light text */
+}
+
+#canvas {
+  width: var(--displayWidth);
+  height: var(--canvasHeight);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Subtle shadow */
+  position: relative;
+  overflow: auto;
+  margin: 16px;
+  /* No background-color here to avoid covering the grid */
+}
+
+.leader-line {
+  clip-path: inset(0); /* Clips the SVG to its bounding box */
+}
+
+.grid-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5000px;
+  height: 5000px;
+  z-index: 0; /* Changed from -1 to ensure it’s above canvas background */
+  pointer-events: none;
+  background-color: #121212; /* Solid background for visibility */
+  background-image:
+    linear-gradient(to right, rgba(187, 134, 252, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(187, 134, 252, 0.1) 1px, transparent 1px),
+    linear-gradient(to right, rgba(187, 134, 252, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(187, 134, 252, 0.2) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+.node-container {
+  position: absolute;
+  width: 100px;
+  height: 50px; /* Default height, adjusted in JS for database nodes */
+  cursor: move;
+  background: transparent; /* Invisible container */
+  z-index: 10;
+}
+
+.node {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  user-select: none;
+  text-align: center;
+  font-size: 12px;
+  color: #E0E0E0;
+}
+
+.start-end {
+  background-color: #33691E; /* Dark green */
+  border-radius: 25px; /* Oval shape */
+}
+
+.task {
+  background-color: #424242; /* Dark gray */
+}
+
+.decision {
+  background-color: #827717; /* Dark yellow */
+  transform: rotate(45deg); /* Diamond shape */
+}
+
+.decision div {
+  transform: rotate(-45deg); /* Counter-rotate text */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event {
+  background-color: #880E4F; /* Dark pink */
+  border-radius: 50%; /* Circle */
+  width: 50px;
+  height: 50px;
+}
+
+.input-output {
+  background-color: #0D47A1; /* Dark blue */
+  transform: skewX(-20deg); /* Parallelogram */
+}
+
+.input-output div {
+  transform: skewX(20deg); /* Counter-skew text */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.document {
+  background-color: #BF360C; /* Dark orange */
+  border-radius: 0 10px 10px 0; /* Document shape */
+}
+
+.database {
+  background-color: #616161; /* Dark gray */
+  border-radius: 50px / 10px; /* Cylinder shape */
+  height: 60px;
+}
+
+.preparation {
+  background-color: #4A148C; /* Dark purple */
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); /* Hexagon */
+}
+
+.swimlane {
+  width: 5000px;
+  min-height: 100px;
+  position: absolute;
+  z-index: 1; /* Swimlanes below nodes */
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.swimlane-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #E0E0E0; /* Light text */
+}
+
+.swimlane-resize-handle {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(66, 66, 66, 0.5);  /* Dark gray */
+  cursor: ns-resize;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.swimlane-color-blue {
+  background-color: rgba(13, 71, 161, 0.5); /* Dark blue */
+}
+
+.swimlane-color-green {
+  background-color: rgba(27, 94, 32, 0.5); /* Dark green */
+}
+
+.swimlane-color-yellow {
+  background-color: rgba(130, 119, 23, 0.5); /* Dark yellow */
+}
+
+.swimlane-color-gray {
+  background-color: rgba(66, 66, 66, 0.5); /* Dark gray */
+}
+
+.selected {
+  border: 2px solid #BB86FC; /* Light purple for selection */
+}
+
+#toolbar {
+  width: var(--displayWidth);
+  display: flex;
+  gap: 8px;
+  margin: 16px;
+  z-index: 100;
+}
+
+button {
+  background-color: #3700B3; /* Dark purple */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #6200EE; /* Lighter purple on hover */
+}
+
+#save-map, #load-map {
+  background-color: #1B5E20; /* Dark green for save/load */
+}
+
+#save-map:hover, #load-map:hover {
+  background-color: #2E7D32; /* Lighter green on hover */
+}
+
+#instructions {
+  margin: 16px;
+  padding: 8px;
+  background-color: #1E1E1E; /* Dark background */
+  border-radius: 4px;
+  color: #BB86FC; /* Light purple text */
+}
+
+#modal, #connector-modal, #node-edit-modal, #swimlane-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1E1E1E; /* Dark modal background */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  border-radius: 4px;
+  padding: 24px;
+  z-index: 1000;
+  color: #E0E0E0; /* Light text */
+  max-height: 80vh; /* Limit modal height to 80% of viewport height */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #E0E0E0; /* Light text */
+}
+
+input[type="text"], select, textarea {
+  width: 100%;
+  padding: 8px 0;
+  background-color: #333333; /* Dark input background */
+  color: #E0E0E0; /* Light text */
+  border: none;
+  border-bottom: 1px solid #616161; /* Subtle border */
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+input[type="text"]:focus, select:focus, textarea:focus {
+  border-bottom: 2px solid #BB86FC; /* Light purple focus */
+  outline: none;
+}
+
+#connector-list {
+  margin-top: 20px;
+}
+
+.connector-item {
+  border-bottom: 1px solid #424242; /* Dark divider */
+  padding: 16px 0;
+}
+
+#node-info {
+  display: none;
+  background: #1E1E1E; /* Dark background */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  padding: 16px;
+  width: calc(50% - 32px); /* 50% of parent width minus margins (16px each side) */
+  border-radius: 4px;
+  margin: 16px;
+  color: #E0E0E0; /* Light text */
+}
+
+#node-info h3 {
+  font-weight: 500;
+  color: #E0E0E0; /* Light text */
+  margin-top: 0;
+}
+
+#node-info textarea {
+  width: 100%;
+  background-color: #333333; /* Dark textarea */
+  color: #E0E0E0; /* Light text */
+  border: 1px solid #616161; /* Subtle border */
+  margin-bottom: 10px;
+}
+
+/* Guideline for alignment */
+.guideline {
+  position: absolute;
+  height: 1px;
+  background-color: #BB86FC; /* Light purple */
+  width: 100%;
+  z-index: 5;
+  display: none;
+}
+
+/* Scrollbar styling for WebKit-based browsers */
+#canvas::-webkit-scrollbar {
+  width: 8px; /* Slim scrollbar for a modern look */
+  height: 8px; /* For horizontal scrollbar */
+}
+
+#canvas::-webkit-scrollbar-track {
+  background: #1E1E1E; /* Dark track background to match modal and node-info */
+  border-radius: 4px; /* Rounded edges for Material Design */
+}
+
+#canvas::-webkit-scrollbar-thumb {
+  background: #616161; /* Muted gray thumb to match database node */
+  border-radius: 4px; /* Rounded thumb */
+}
+
+#canvas::-webkit-scrollbar-thumb:hover {
+  background: #BB86FC; /* Light purple on hover to match selection and focus */
+}
+
+/* Scrollbar styling for Firefox */
+#canvas {
+  scrollbar-color: #616161 #1E1E1E; /* Thumb and track colors */
+  scrollbar-width: thin; /* Slim scrollbar */
+}
+
+/* Title section styling */
+#title-section {
+  margin: 16px;
+  display: flex;
+  align-items: center;
+  width: calc(25%); /* 50% of parent width minus margins (16px each side) */
+  white-space: nowrap;
+}
+
+#title-section label {
+  margin-right: 8px;
+  color: #E0E0E0;
+}
+
+#map-title {
+  background-color: #333333;
+  color: #E0E0E0;
+  border: none;
+  border-bottom: 1px solid #616161;
+  font-size: 16px;
+  padding: 8px;
+  flex-grow: 1;
+}
+
+/* Connector edit section */
+#connector-edit-section {
+  margin-top: 16px;
+}
+
+/*VSM STUFF*/
+#vsm-area {
+  position: relative;
+  height: 600px;
+  border: 1px solid #333333;
+  background-color: #1F1F1F;
+}
+.vsm-container {
+  width: 300px;
+  height: 200px;
+  position: absolute;
+  background-color: rgba(31, 31, 31, 0.5);
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  z-index: 5;
+}
+.drag-handle {
+  height: 20px;
+  background-color: #333333;
+  cursor: move;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+.vsm-table {
+  position: absolute;
+  bottom: 10px;
+  left: calc(50% - 100px);
+  width: 200px;
+  background-color: #1F1F1F;
+  border: none;
+  text-align: left;
+}
+.vsm-table tr {
+  border-bottom: 1px solid #666666;
+}
+.vsm-table tr:last-child {
+  border-bottom: none;
+}
+.vsm-table td {
+  padding: 5px;
+}
+#overall-stats {
+  margin-top: 20px;
+}
+#overall-stats table {
+  background-color: #1F1F1F;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+.resize-handle {
+  position: absolute;
+  background: #666666;
+  z-index: 10;
+}
+.resize-handle.top, .resize-handle.bottom {
+  width: 100%;
+  height: 5px;
+  left: 0;
+}
+.resize-handle.left, .resize-handle.right {
+  height: 100%;
+  width: 5px;
+  top: 0;
+}
+.resize-handle.top {
+  top: -5px;
+  cursor: ns-resize;
+}
+.resize-handle.bottom {
+  bottom: -5px;
+  cursor: ns-resize;
+}
+.resize-handle.left {
+  left: -5px;
+  cursor: ew-resize;
+}
+.resize-handle.right {
+  right: -5px;
+  cursor: ew-resize;
+}
+.resize-handle.top-left {
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.resize-handle.top-right {
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+.resize-handle.bottom-left {
+  bottom: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+.resize-handle.bottom-right {
+  bottom: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.vsm-number {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: #333333;
+  color: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 10;
+}
+.close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: #FFFFFF;
+  background-color: #CF6679;
+  padding: 2px 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 12px;
+}
+button {
+  background-color: #BB86FC;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+button:hover {
+  background-color: #D8B4FE;
+}
+input {
+  background-color: #333333;
+  color: #FFFFFF;
+  border: 1px solid #666666;
+  padding: 4px;
+  border-radius: 4px;
+  width: 60px;
+}
