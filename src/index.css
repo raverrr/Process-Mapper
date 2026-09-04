@@ -695,7 +695,7 @@ textarea {
 }
 
 .react-flow__edge-textbg {
-  fill: #14141a;
+  fill: #1b1b24;
 }
 
 .react-flow__controls {
@@ -723,17 +723,6 @@ textarea {
 
 .overview-map svg {
   display: block;
-}
-
-.edge-label {
-  position: absolute;
-  background: #1b1b24;
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  pointer-events: all;
 }
 
 .react-flow__attribution {

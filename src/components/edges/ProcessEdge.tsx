@@ -1,6 +1,5 @@
 import {
   BaseEdge,
-  EdgeLabelRenderer,
   getBezierPath,
   getSmoothStepPath,
   getStraightPath,
@@ -51,28 +50,30 @@ export function ProcessEdge({
           ? getBezierPath(params)
           : getSmoothStepPath(params);
 
+  const text = data?.label || (typeof label === 'string' ? label : undefined);
+
   return (
-    <>
-      <BaseEdge
-        id={id}
-        path={path}
-        markerEnd={markerEnd}
-        style={style}
-        interactionWidth={20}
-        className={selected ? 'selected' : undefined}
-      />
-      {label ? (
-        <EdgeLabelRenderer>
-          <div
-            className="nodrag nopan edge-label"
-            style={{
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-            }}
-          >
-            {label}
-          </div>
-        </EdgeLabelRenderer>
-      ) : null}
-    </>
+    <BaseEdge
+      id={id}
+      path={path}
+      labelX={labelX}
+      labelY={labelY}
+      label={text}
+      labelShowBg
+      labelStyle={{
+        fill: selected ? '#e6d6ff' : '#ececf1',
+        fontSize: 11,
+        fontWeight: 500,
+      }}
+      labelBgStyle={{
+        fill: '#1b1b24',
+        stroke: selected ? '#c4a7f7' : '#2a2a36',
+      }}
+      labelBgPadding={[5, 8]}
+      labelBgBorderRadius={10}
+      markerEnd={markerEnd}
+      style={style}
+      interactionWidth={20}
+    />
   );
 }
