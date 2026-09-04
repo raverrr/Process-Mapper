@@ -24,7 +24,7 @@ Production builds on GitHub Actions use the `/Process-Mapper/` base path so asse
 
 ## Use
 
-- **Zoom / pan:** scroll or pinch to zoom, drag empty canvas to pan, **Fit** or `1` to frame the map.
+- **Zoom / pan:** scroll or pinch to zoom. Drag empty canvas **or a swimlane** to pan. **Space+drag** or **middle-mouse drag** pans over nodes too. **Fit** or `1` frames the map.
 - **Add a node:** drag from the left palette, or click a type then click the canvas.
 - **Connect:** drag from a handle. Drop on another node, or on empty canvas to create a task and connect it.
 - **Rename:** double-click a node.
@@ -42,6 +42,7 @@ Production builds on GitHub Actions use the `/Process-Mapper/` base path so asse
 | `Ctrl/Cmd + C` / `V` / `D` | Copy / paste / duplicate |
 | `Delete` | Delete selected |
 | `[` / `]` | Show / hide nodes pane / inspector |
+| `Space` + drag | Pan (works over nodes and lanes) |
 | `Esc` | Cancel / deselect |
 | `?` | Shortcut list |
 

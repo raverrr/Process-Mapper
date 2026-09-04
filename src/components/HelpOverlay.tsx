@@ -1,6 +1,7 @@
 const SHORTCUTS = [
   ['Scroll / pinch', 'Zoom'],
-  ['Drag empty canvas', 'Pan'],
+  ['Drag empty canvas or a lane', 'Pan'],
+  ['Space + drag, or middle mouse', 'Pan over anything'],
   ['Drag a node', 'Move · snap to others'],
   ['Drag a handle', 'Connect · drop on empty canvas to add a task'],
   ['Double-click a node', 'Rename'],

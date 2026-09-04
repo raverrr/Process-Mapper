@@ -79,6 +79,9 @@ export function Editor() {
   const [helperLines, setHelperLines] = useState<HelperLines>({});
   const [status, setStatus] = useState(loadAutosave() ? 'Restored local draft' : '');
   const [helpOpen, setHelpOpen] = useState(false);
+  const [panMode, setPanMode] = useState(false);
+  const panModeRef = useRef(false);
+  panModeRef.current = panMode;
   const { paletteOpen, setPaletteOpen, inspectorOpen, setInspectorOpen } = useUiPrefs();
   const fileRef = useRef<HTMLInputElement>(null);
   const clipboard = useRef<{ nodes: AppNode[]; edges: AppEdge[] } | null>(null);
@@ -248,7 +251,7 @@ export function Editor() {
 
   const onPaneClick = useCallback(
     (event: ReactMouseEvent) => {
-      if (!pendingKind) return;
+      if (panModeRef.current || !pendingKind) return;
       placeAt(screenToFlowPosition({ x: event.clientX, y: event.clientY }), pendingKind);
       setPendingKind(null);
     },
@@ -257,7 +260,7 @@ export function Editor() {
 
   const onNodeClick = useCallback(
     (_event: ReactMouseEvent, node: AppNode) => {
-      if (!pendingKind || pendingKind === 'swimlane' || node.type === 'swimlane') return;
+      if (panModeRef.current || !pendingKind || pendingKind === 'swimlane' || node.type === 'swimlane') return;
       const size = nodeSize(node);
       const created = createProcessNode(pendingKind, {
         x: node.position.x + size.w + 72,
@@ -408,6 +411,39 @@ export function Editor() {
   }, [flash, nodes, title]);
 
   useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== 'Space' || isTypingTarget(event.target)) return;
+      event.preventDefault();
+      if (!event.repeat) setPanMode(true);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.code === 'Space') setPanMode(false);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button === 1) {
+        event.preventDefault();
+        setPanMode(true);
+      }
+    };
+    const onPointerUp = (event: PointerEvent) => {
+      if (event.button === 1) setPanMode(false);
+    };
+    const endPan = () => setPanMode(false);
+    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('blur', endPan);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('blur', endPan);
+    };
+  }, []);
+
+  useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const typing = isTypingTarget(event.target);
       const meta = event.metaKey || event.ctrlKey;
@@ -494,7 +530,7 @@ export function Editor() {
   };
 
   return (
-    <div className={`shell${pendingKind ? ' is-stamping' : ''}`}>
+    <div className={`shell${pendingKind ? ' is-stamping' : ''}${panMode ? ' is-panning' : ''}`}>
       <Topbar
         title={title}
         status={status}
@@ -574,6 +610,8 @@ export function Editor() {
             minZoom={0.12}
             maxZoom={2.4}
             zoomOnDoubleClick={false}
+            panOnDrag={[0, 1, 2]}
+            nodesDraggable={!panMode}
             deleteKeyCode={['Backspace', 'Delete']}
             multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
             edgesReconnectable
@@ -602,7 +640,9 @@ export function Editor() {
             <Panel position="top-left" className="canvas-hint">
               {pendingKind
                 ? `Click the canvas to place ${pendingKind === 'swimlane' ? 'a swimlane' : KIND_META[pendingKind].label}. Esc cancels.`
-                : 'Scroll to zoom · drag the canvas to pan · drag a handle to connect'}
+                : panMode
+                  ? 'Drag to pan'
+                  : 'Scroll to zoom · drag empty space or a lane to pan · Space/middle-drag anywhere'}
             </Panel>
             <Panel position="bottom-left" className="vsm-panel">
               <VsmTimeline nodes={nodes} hoursPerDay={hoursPerDay} />

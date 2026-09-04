@@ -49,6 +49,21 @@ textarea {
   cursor: crosshair;
 }
 
+.shell.is-panning,
+.shell.is-panning .react-flow__pane,
+.shell.is-panning .react-flow__node {
+  cursor: grab !important;
+}
+
+.shell.is-panning:active,
+.shell.is-panning:active .react-flow__pane {
+  cursor: grabbing !important;
+}
+
+.shell.is-panning .react-flow__node {
+  pointer-events: none !important;
+}
+
 .topbar {
   display: grid;
   grid-template-columns: auto minmax(120px, 1fr) auto auto;
@@ -490,6 +505,10 @@ textarea {
   color: var(--muted);
 }
 
+.react-flow__node.react-flow__node-swimlane {
+  pointer-events: none !important;
+}
+
 .swimlane-node {
   width: 100%;
   height: 100%;
@@ -500,6 +519,11 @@ textarea {
 
 .swimlane-node.is-selected {
   box-shadow: 0 0 0 1px #c4a7f7;
+}
+
+.react-flow__node-swimlane .swimlane-drag,
+.react-flow__node-swimlane .react-flow__resize-control {
+  pointer-events: auto !important;
 }
 
 .swimlane-drag {
