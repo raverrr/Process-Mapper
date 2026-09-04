@@ -468,26 +468,8 @@ textarea {
   padding: 18px 22px;
 }
 
-.kind-event .process-node-caption {
-  inset: auto;
-  top: 100%;
-  left: 50%;
-  width: 152px;
-  transform: translateX(-50%);
-  padding-top: 14px;
-  gap: 6px;
-  justify-content: flex-start;
-  pointer-events: auto;
-}
-
 .kind-event .process-node-label {
-  padding: 0 2px;
-  width: 100%;
-  font-size: 12px;
-}
-
-.kind-event .process-node-input {
-  width: 100%;
+  padding: 28px 24px;
 }
 
 .process-node-label span {
@@ -522,13 +504,6 @@ textarea {
   border-radius: 999px;
   white-space: nowrap;
   pointer-events: none;
-}
-
-.kind-event .process-node-vsm {
-  position: static;
-  left: auto;
-  bottom: auto;
-  transform: none;
 }
 
 .node-toolbar-chip {

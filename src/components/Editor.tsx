@@ -19,7 +19,7 @@ import {
   type OnNodeDrag,
 } from '@xyflow/react';
 import { useCallback, useEffect, useRef, useState, type DragEvent, type MouseEvent as ReactMouseEvent } from 'react';
-import { KIND_META } from '../constants';
+import { KIND_META, KIND_SIZES } from '../constants';
 import { useHistory, type Snapshot } from '../hooks/useHistory';
 import { useUiPrefs } from '../hooks/useUiPrefs';
 import { createEdge, createProcessNode, createSwimlaneNode } from '../lib/factory';
@@ -34,7 +34,7 @@ import {
   nodeSize,
   sortParentsFirst,
 } from '../lib/geometry';
-import { snapToGrid, snapToHelpers, type HelperLines } from '../lib/helpers';
+import { snapCenterToGrid, snapPosition, type HelperLines } from '../lib/helpers';
 import { nextId } from '../lib/ids';
 import {
   emptyDocument,
@@ -127,17 +127,21 @@ export function Editor() {
 
   const onNodesChange = useCallback(
     (changes: NodeChange<AppNode>[]) => {
-      const dragging = changes.find(
-        (change) => change.type === 'position' && change.dragging && change.position,
-      );
-      if (dragging && dragging.type === 'position' && dragging.position) {
-        const snapped = snapToHelpers(dragging.id, dragging.position, nodes);
-        dragging.position =
-          snapped.lines.horizontal != null || snapped.lines.vertical != null
-            ? snapped.position
-            : snapToGrid(dragging.position);
-        setHelperLines(snapped.lines);
-      } else if (!changes.some((change) => change.type === 'position' && change.dragging)) {
+      let dragging = false;
+      let helperLines: HelperLines = {};
+      for (const change of changes) {
+        if (change.type !== 'position' || !change.position) continue;
+        const node = nodes.find((item) => item.id === change.id);
+        if (!node || node.type === 'swimlane') continue;
+        const snapped = snapPosition(change.id, change.position, nodes);
+        change.position = snapped.position;
+        if (change.dragging) {
+          dragging = true;
+          helperLines = snapped.lines;
+        }
+      }
+      if (dragging) setHelperLines(helperLines);
+      else if (!changes.some((change) => change.type === 'position' && change.dragging)) {
         setHelperLines({});
       }
 
@@ -239,9 +243,10 @@ export function Editor() {
         setNodes((current) => sortParentsFirst(current.concat(createSwimlaneNode(position))));
         return;
       }
-      const node = createProcessNode(kind, position);
+      const size = KIND_SIZES[kind];
+      const node = createProcessNode(kind, snapCenterToGrid(position, size));
       setNodes((current) => {
-        const lane = laneAtPoint(position, current);
+        const lane = laneAtPoint(node.position, current);
         const placed = lane ? attachToLane(node, lane, [...current, node]) : node;
         return sortParentsFirst(current.concat(placed));
       });
@@ -262,9 +267,10 @@ export function Editor() {
     (_event: ReactMouseEvent, node: AppNode) => {
       if (panModeRef.current || !pendingKind || pendingKind === 'swimlane' || node.type === 'swimlane') return;
       const size = nodeSize(node);
+      const createdSize = KIND_SIZES[pendingKind];
       const created = createProcessNode(pendingKind, {
         x: node.position.x + size.w + 72,
-        y: node.position.y,
+        y: node.position.y + size.h / 2 - createdSize.h / 2,
       });
       if (node.parentId) created.parentId = node.parentId;
       snap();

@@ -108,8 +108,8 @@ describe('parseMap', () => {
       edges: [],
     });
     const node = result.doc.nodes[0];
-    expect(node.style?.width).toBe(96);
-    expect(node.style?.height).toBe(96);
-    expect(node.position).toEqual({ x: 92, y: 72 });
+    expect(node.style?.width).toBe(128);
+    expect(node.style?.height).toBe(128);
+    expect(node.position).toEqual({ x: 76, y: 56 });
   });
 });
