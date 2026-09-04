@@ -1,7 +1,7 @@
 import { useUpdateNodeInternals } from '@xyflow/react';
 import type { Dispatch, SetStateAction } from 'react';
 import { KIND_META, KIND_SIZES, PATH_LABELS } from '../constants';
-import { pathToEdgeType } from '../lib/factory';
+
 import { computeVsm, formatDuration, trimNumber } from '../model/vsm';
 import {
   PATH_KINDS,
@@ -89,7 +89,7 @@ export function Inspector({
         return {
           ...e,
           label: data.label || undefined,
-          type: pathToEdgeType(data.path),
+          type: 'process',
           animated: Boolean(data.dashed),
           style: data.dashed ? { strokeDasharray: '7 5' } : undefined,
           data,

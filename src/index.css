@@ -698,8 +698,7 @@ textarea {
   fill: #14141a;
 }
 
-.react-flow__controls,
-.react-flow__minimap {
+.react-flow__controls {
   border: 1px solid var(--border) !important;
   border-radius: 10px !important;
   overflow: hidden;
@@ -712,8 +711,29 @@ textarea {
   fill: var(--text) !important;
 }
 
-.react-flow__minimap {
-  background: #121218 !important;
+.overview-map {
+  padding: 0 !important;
+  background: #121218;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.overview-map svg {
+  display: block;
+}
+
+.edge-label {
+  position: absolute;
+  background: #1b1b24;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  pointer-events: all;
 }
 
 .react-flow__attribution {

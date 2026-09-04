@@ -5,7 +5,6 @@ import {
   ConnectionMode,
   Controls,
   MarkerType,
-  MiniMap,
   Panel,
   ReactFlow,
   applyNodeChanges,
@@ -20,7 +19,7 @@ import {
   type OnNodeDrag,
 } from '@xyflow/react';
 import { useCallback, useEffect, useRef, useState, type DragEvent, type MouseEvent as ReactMouseEvent } from 'react';
-import { KIND_META, SNAP_GRID } from '../constants';
+import { KIND_META } from '../constants';
 import { useHistory, type Snapshot } from '../hooks/useHistory';
 import { useUiPrefs } from '../hooks/useUiPrefs';
 import { createEdge, createProcessNode, createSwimlaneNode } from '../lib/factory';
@@ -35,7 +34,7 @@ import {
   nodeSize,
   sortParentsFirst,
 } from '../lib/geometry';
-import { snapToHelpers, type HelperLines } from '../lib/helpers';
+import { snapToGrid, snapToHelpers, type HelperLines } from '../lib/helpers';
 import { nextId } from '../lib/ids';
 import {
   emptyDocument,
@@ -45,14 +44,15 @@ import {
   saveAutosave,
   toDocument,
 } from '../model/document';
-import type { AppEdge, AppNode, ProcessKind, ProcessNodeData } from '../types';
+import type { AppEdge, AppNode, ProcessKind } from '../types';
 import { HelperLinesOverlay } from './HelperLines';
 import { HelpOverlay } from './HelpOverlay';
 import { Inspector } from './Inspector';
 import { Palette } from './Palette';
 import { Topbar } from './Topbar';
 import { VsmTimeline } from './VsmTimeline';
-import { nodeTypes } from './nodes';
+import { OverviewMap } from './OverviewMap';
+import { edgeTypes, nodeTypes } from './nodes';
 
 const boot = loadAutosave() ?? emptyDocument();
 
@@ -129,7 +129,10 @@ export function Editor() {
       );
       if (dragging && dragging.type === 'position' && dragging.position) {
         const snapped = snapToHelpers(dragging.id, dragging.position, nodes);
-        dragging.position = snapped.position;
+        dragging.position =
+          snapped.lines.horizontal != null || snapped.lines.vertical != null
+            ? snapped.position
+            : snapToGrid(dragging.position);
         setHelperLines(snapped.lines);
       } else if (!changes.some((change) => change.type === 'position' && change.dragging)) {
         setHelperLines({});
@@ -564,11 +567,10 @@ export function Editor() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             connectionMode={ConnectionMode.Loose}
             connectionLineType={ConnectionLineType.SmoothStep}
             connectionRadius={28}
-            snapToGrid
-            snapGrid={SNAP_GRID}
             minZoom={0.12}
             maxZoom={2.4}
             zoomOnDoubleClick={false}
@@ -581,7 +583,7 @@ export function Editor() {
             defaultViewport={boot.viewport ?? { x: 40, y: 24, zoom: 1 }}
             onNodeClick={onNodeClick}
             defaultEdgeOptions={{
-              type: 'smoothstep',
+              type: 'process',
               markerEnd: { type: MarkerType.ArrowClosed, color: '#c8c8d4', width: 16, height: 16 },
             }}
             isValidConnection={(c) => c.source !== c.target}
@@ -595,18 +597,7 @@ export function Editor() {
               color="rgba(196,167,247,0.16)"
             />
             <Controls showInteractive={false} />
-            <MiniMap
-              pannable
-              zoomable
-              nodeColor={(node) => {
-                if (node.type === 'swimlane') return '#2a2a36';
-                if (node.type === 'process') {
-                  return KIND_META[(node.data as ProcessNodeData).kind].color;
-                }
-                return '#666';
-              }}
-              maskColor="rgba(8,8,12,0.7)"
-            />
+            <OverviewMap />
             <HelperLinesOverlay lines={helperLines} />
             <Panel position="top-left" className="canvas-hint">
               {pendingKind

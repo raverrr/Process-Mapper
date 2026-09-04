@@ -57,10 +57,6 @@ export function createSwimlaneNode(
   };
 }
 
-export function pathToEdgeType(path: PathKind): AppEdge['type'] {
-  return path === 'bezier' ? 'default' : path;
-}
-
 export function createEdge(
   source: string,
   target: string,
@@ -79,7 +75,7 @@ export function createEdge(
     target,
     sourceHandle: options.sourceHandle ?? undefined,
     targetHandle: options.targetHandle ?? undefined,
-    type: pathToEdgeType(path),
+    type: 'process',
     label: options.label || undefined,
     animated: Boolean(options.dashed),
     style: options.dashed ? { strokeDasharray: '7 5' } : undefined,

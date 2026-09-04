@@ -43,7 +43,9 @@ export function parseMap(data: unknown): { doc: MapDocument; migratedFromV1: boo
         title: data.title || 'Untitled Map',
         hoursPerDay: data.hoursPerDay > 0 ? data.hoursPerDay : DEFAULT_HOURS_PER_DAY,
         nodes: Array.isArray(data.nodes) ? (data.nodes as AppNode[]) : [],
-        edges: Array.isArray(data.edges) ? (data.edges as AppEdge[]) : [],
+        edges: Array.isArray(data.edges)
+          ? (data.edges as AppEdge[]).map((edge) => ({ ...edge, type: 'process' as const }))
+          : [],
         viewport: data.viewport,
       },
       migratedFromV1: false,
