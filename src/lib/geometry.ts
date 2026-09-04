@@ -1,5 +1,5 @@
 import type { XYPosition } from '@xyflow/react';
-import { SWIMLANE_LABEL_WIDTH } from '../constants';
+import { SWIMLANE_LABEL_WIDTH, SWIMLANE_WIDTH } from '../constants';
 import type { AppNode, SwimlaneNode } from '../types';
 
 export function nodeSize(node: AppNode): { w: number; h: number } {
@@ -80,6 +80,30 @@ export function laneAtPoint(point: XYPosition, nodes: AppNode[]): SwimlaneNode |
     }
   }
   return undefined;
+}
+
+export function maxSwimlaneWidth(nodes: AppNode[]): number {
+  const lanes = nodes.filter((node): node is SwimlaneNode => node.type === 'swimlane');
+  if (!lanes.length) return SWIMLANE_WIDTH;
+  return Math.max(...lanes.map((lane) => nodeSize(lane).w));
+}
+
+export function applyEqualSwimlaneWidth(nodes: AppNode[], width: number): AppNode[] {
+  let changed = false;
+  const next = nodes.map((node) => {
+    if (node.type !== 'swimlane') return node;
+    const current = nodeSize(node).w;
+    const styleWidth = node.style?.width;
+    if (current === width && styleWidth === width) return node;
+    changed = true;
+    return {
+      ...node,
+      width,
+      style: { ...node.style, width },
+      measured: node.measured ? { ...node.measured, width } : node.measured,
+    };
+  });
+  return changed ? next : nodes;
 }
 
 export function nextSwimlanePosition(nodes: AppNode[]): XYPosition {

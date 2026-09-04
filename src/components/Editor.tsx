@@ -26,10 +26,12 @@ import { createEdge, createProcessNode, createSwimlaneNode } from '../lib/factor
 import { exportPng } from '../lib/exportImage';
 import { downloadText } from '../lib/download';
 import {
+  applyEqualSwimlaneWidth,
   attachToLane,
   detachFromParent,
   getAbsolutePosition,
   laneAtPoint,
+  maxSwimlaneWidth,
   nextSwimlanePosition,
   nodeSize,
   sortParentsFirst,
@@ -73,7 +75,7 @@ export function Editor() {
   const { screenToFlowPosition, fitView, getViewport, deleteElements, setViewport } = useReactFlow();
   const [title, setTitle] = useState(boot.title);
   const [hoursPerDay, setHoursPerDay] = useState(boot.hoursPerDay);
-  const [nodes, setNodes, onNodesChangeDefault] = useNodesState(boot.nodes);
+  const [nodes, setNodes] = useNodesState(boot.nodes);
   const [edges, setEdges, onEdgesChangeDefault] = useEdgesState(boot.edges);
   const [pendingKind, setPendingKind] = useState<ProcessKind | 'swimlane' | null>(null);
   const [helperLines, setHelperLines] = useState<HelperLines>({});
@@ -82,7 +84,14 @@ export function Editor() {
   const [panMode, setPanMode] = useState(false);
   const panModeRef = useRef(false);
   panModeRef.current = panMode;
-  const { paletteOpen, setPaletteOpen, inspectorOpen, setInspectorOpen } = useUiPrefs();
+  const {
+    paletteOpen,
+    setPaletteOpen,
+    inspectorOpen,
+    setInspectorOpen,
+    equalSwimlaneWidths,
+    setEqualSwimlaneWidths,
+  } = useUiPrefs();
   const fileRef = useRef<HTMLInputElement>(null);
   const clipboard = useRef<{ nodes: AppNode[]; edges: AppEdge[] } | null>(null);
   const dragKind = useRef<ProcessKind | 'swimlane' | null>(null);
@@ -125,6 +134,11 @@ export function Editor() {
     return () => window.clearTimeout(timer);
   }, [status]);
 
+  useEffect(() => {
+    if (!equalSwimlaneWidths) return;
+    setNodes((current) => applyEqualSwimlaneWidth(current, maxSwimlaneWidth(current)));
+  }, [equalSwimlaneWidths, setNodes]);
+
   const onNodesChange = useCallback(
     (changes: NodeChange<AppNode>[]) => {
       let dragging = false;
@@ -162,9 +176,21 @@ export function Editor() {
         return;
       }
 
-      onNodesChangeDefault(changes);
+      setNodes((current) => {
+        let next = applyNodeChanges(changes, current);
+        if (equalSwimlaneWidths) {
+          for (const change of changes) {
+            if (change.type !== 'dimensions' || !change.dimensions) continue;
+            const before = current.find((item) => item.id === change.id);
+            if (before?.type !== 'swimlane') continue;
+            next = applyEqualSwimlaneWidth(next, change.dimensions.width);
+            break;
+          }
+        }
+        return next;
+      });
     },
-    [nodes, onNodesChangeDefault, setNodes],
+    [equalSwimlaneWidths, nodes, setNodes],
   );
 
   const onEdgesChange = useCallback(
@@ -240,7 +266,10 @@ export function Editor() {
     (position: { x: number; y: number }, kind: ProcessKind | 'swimlane') => {
       snap();
       if (kind === 'swimlane') {
-        setNodes((current) => sortParentsFirst(current.concat(createSwimlaneNode(position))));
+        setNodes((current) => {
+          const width = equalSwimlaneWidths ? maxSwimlaneWidth(current) : undefined;
+          return sortParentsFirst(current.concat(createSwimlaneNode(position, 'Lane', 'blue', width)));
+        });
         return;
       }
       const size = KIND_SIZES[kind];
@@ -251,7 +280,7 @@ export function Editor() {
         return sortParentsFirst(current.concat(placed));
       });
     },
-    [setNodes, snap],
+    [equalSwimlaneWidths, setNodes, snap],
   );
 
   const onPaneClick = useCallback(
@@ -363,10 +392,13 @@ export function Editor() {
 
   const addSwimlane = useCallback(() => {
     snap();
-    setNodes((current) =>
-      sortParentsFirst(current.concat(createSwimlaneNode(nextSwimlanePosition(current)))),
-    );
-  }, [setNodes, snap]);
+    setNodes((current) => {
+      const width = equalSwimlaneWidths ? maxSwimlaneWidth(current) : undefined;
+      return sortParentsFirst(
+        current.concat(createSwimlaneNode(nextSwimlanePosition(current), 'Lane', 'blue', width)),
+      );
+    });
+  }, [equalSwimlaneWidths, setNodes, snap]);
 
   const onNew = useCallback(() => {
     if (!window.confirm('Start a new map? The current one is already autosaved in this browser.')) return;
@@ -393,7 +425,11 @@ export function Editor() {
         history.reset();
         setTitle(parsed.doc.title);
         setHoursPerDay(parsed.doc.hoursPerDay);
-        setNodes(parsed.doc.nodes);
+        setNodes(
+          equalSwimlaneWidths
+            ? applyEqualSwimlaneWidth(parsed.doc.nodes, maxSwimlaneWidth(parsed.doc.nodes))
+            : parsed.doc.nodes,
+        );
         setEdges(parsed.doc.edges);
         window.setTimeout(() => {
           if (parsed.doc.viewport) setViewport(parsed.doc.viewport);
@@ -404,7 +440,7 @@ export function Editor() {
         flash(error instanceof Error ? error.message : 'Could not load file');
       }
     },
-    [fitView, flash, history, setEdges, setNodes, setViewport],
+    [equalSwimlaneWidths, fitView, flash, history, setEdges, setNodes, setViewport],
   );
 
   const onPng = useCallback(async () => {
@@ -557,6 +593,8 @@ export function Editor() {
         }}
         onFit={() => void fitView({ padding: 0.2 })}
         onHelp={() => setHelpOpen(true)}
+        equalSwimlaneWidths={equalSwimlaneWidths}
+        onEqualSwimlaneWidths={setEqualSwimlaneWidths}
       />
       <div
         className={`workspace${paletteOpen ? '' : ' palette-collapsed'}${inspectorOpen ? '' : ' inspector-collapsed'}`}

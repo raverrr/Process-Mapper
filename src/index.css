@@ -120,6 +120,36 @@ textarea {
   align-items: center;
 }
 
+.settings-wrap {
+  position: relative;
+}
+
+.settings-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 268px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  z-index: 40;
+}
+
+.settings-menu .check {
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.settings-menu .field-hint {
+  margin-bottom: 0;
+}
+
+.btn.is-open {
+  border-color: var(--accent);
+}
+
 .btn {
   background: var(--bg-elev);
   border: 1px solid var(--border);

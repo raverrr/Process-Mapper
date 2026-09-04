@@ -46,6 +46,7 @@ export function createSwimlaneNode(
   position: XYPosition,
   label = 'Lane',
   color: SwimlaneColor = 'blue',
+  width = SWIMLANE_WIDTH,
 ): SwimlaneNode {
   return {
     id: nextId('lane'),
@@ -53,7 +54,7 @@ export function createSwimlaneNode(
     position,
     dragHandle: '.swimlane-drag',
     zIndex: 0,
-    style: { width: SWIMLANE_WIDTH, height: SWIMLANE_HEIGHT },
+    style: { width, height: SWIMLANE_HEIGHT },
     data: { label, color },
   };
 }
