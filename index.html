@@ -1,146 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Process Map - Untitled Map</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="interact.min.js"></script>
-  <script src="leader-line.min.js"></script>
-</head>
-<body>
-  <div id="title-section">
-    <label for="map-title">Map Title:</label>
-    <input type="text" id="map-title" value="Untitled Map">
-  </div>
-
-  <div id="toolbar">
-    <button id="add-node">Add Node</button>
-    <button id="add-connector">Add Connector</button>
-    <button id="add-swimlane">Add Swimlane</button>
-    <button id="edit-node" disabled>Edit Node</button>
-    <button id="add-vsm">Add VSM Container</button>
-    <button id="delete-node">Delete Node</button>
-    <button id="save-map">Save Map</button>
-    <button id="load-map">Load Map</button>
-    <input type="file" id="import-file" accept=".json" style="display: none;">
-  </div>
-
-  <div id="canvas"></div>
-
-  <div id="instructions"></div>
-
-  <div id="node-info">
-    <h3>Node Information</h3>
-    <label>Notes:</label>
-    <textarea id="notes" rows="4" disabled></textarea>
-    <label>Owners:</label>
-    <textarea id="owners" rows="2" disabled></textarea>
-  </div>
-<!--vsm-->
-    <div id="overall-stats">
-        <table>
-            <tr><td>Overall %C&A: <span id="overall-percent">100.00</span>%</td></tr>
-            <tr><td>Process Cycle Efficiency (PCE): <span id="pce">0.00</span>%</td></tr>
-        </table>
-    </div>
-<!--vsm-->
-
-  <div id="modal">
-    <h2>Add Node</h2>
-    <form id="node-form">
-      <label>Type:
-        <select id="node-type">
-          <option value="start-end" data-description="Start/End Event: Represents the beginning or end of a process (e.g., 'Process Start' or 'Process Complete').">Start/End</option>
-          <option value="task" data-description="Activity/Task: Denotes a specific task or step in the process (e.g., 'Review Document' or 'Send Email').">Task</option>
-          <option value="decision" data-description="Decision Point: Indicates a decision where the flow splits based on a condition (e.g., 'Is approval granted?').">Decision</option>
-          <option value="event" data-description="Event: Represents an intermediate event like a delay or message (e.g., 'Wait for Response').">Event</option>
-          <option value="input-output" data-description="Input/Output: Indicates data or material entering or leaving the process (e.g., 'Receive Input Data').">Input/Output</option>
-          <option value="document" data-description="Document: Represents a physical or digital document (e.g., 'Invoice' or 'Contract').">Document</option>
-          <option value="database" data-description="Data Storage: Indicates a database or storage system (e.g., 'Customer Database').">Database</option>
-          <option value="preparation" data-description="Preparation: Indicates a setup step before a task (e.g., 'Prepare Equipment').">Preparation</option>
-        </select>
-      </label>
-      <label>Name: <input type="text" id="node-name"></label>
-      <label>Connector Type:
-        <select id="node-path-type">
-          <option value="straight">Straight</option>
-          <option value="arc">Arc</option>
-          <option value="fluid">Fluid</option>
-          <option value="magnet">Magnet</option>
-          <option value="dash">Dotted Line</option>
-        </select>
-      </label>
-      <div id="label-field" style="display: none;">
-        <label>Connection Label: <input type="text" id="connection-label"></label>
-      </div>
-      <label>
-        <input type="checkbox" id="align-horizontal"> Align horizontally with selected node
-      </label>
-      <button type="submit">Add</button>
-    </form>
-  </div>
-
-  <div id="connector-modal">
-    <h2>Add Connector</h2>
-    <form id="connector-form">
-      <label>Path Type:
-        <select id="connector-path-type">
-          <option value="straight">Straight</option>
-          <option value="arc">Arc</option>
-          <option value="fluid">Fluid</option>
-          <option value="magnet">Magnet</option>
-          <option value="dash">Dotted Line</option>
-        </select>
-      </label>
-      <label>Label: <input type="text" id="connector-label"></label>
-      <button type="submit">Add Connector</button>
-    </form>
-  </div>
-
-  <div id="swimlane-modal">
-    <h2>Add Swimlane</h2>
-    <form id="swimlane-form">
-      <label>Label: <input type="text" id="swimlane-label"></label>
-      <label>Color:
-        <select id="swimlane-color">
-          <option value="gray">Light Gray</option>
-          <option value="blue">Light Blue</option>
-          <option value="green">Light Green</option>
-          <option value="yellow">Light Yellow</option>
-        </select>
-      </label>
-      <button type="submit">Add Swimlane</button>
-    </form>
-  </div>
-
-  <div id="node-edit-modal" style="display: none;">
-    <h2>Edit Node</h2>
-    <form id="node-edit-form">
-      <label>Type:
-        <select id="edit-node-type">
-          <option value="start-end">Start/End</option>
-          <option value="task">Task</option>
-          <option value="decision">Decision</option>
-          <option value="event">Event</option>
-          <option value="input-output">Input/Output</option>
-          <option value="document">Document</option>
-          <option value="database">Database</option>
-          <option value="preparation">Preparation</option>
-        </select>
-      </label>
-      <label>Name: <input type="text" id="edit-node-name"></label>
-      <div id="connector-list"></div>
-      <div id="connector-edit-section"></div>
-      <button type="submit">Save</button>
-    </form>
-  </div>
-
-  <script src="utils.js"></script>
-  <script src="node-management.js"></script>
-  <script src="connector-management.js"></script>
-  <script src="swimlane-management.js"></script>
-  <script src="map-io.js"></script>
-  <script src="vsm-management.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Process Mapper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
