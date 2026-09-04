@@ -2,9 +2,11 @@
 
 A browser editor for process maps and value stream maps. Infinite canvas, zoom, swimlanes, and VSM metrics on the steps themselves.
 
-Old v1 JSON files from the previous version still load.
+**Use it here:** [https://raverrr.github.io/Process-Mapper/](https://raverrr.github.io/Process-Mapper/)
 
-## Run
+Maps stay in your browser (localStorage + JSON download). Old v1 JSON files still load.
+
+## Run locally
 
 ```bash
 npm install
@@ -18,7 +20,7 @@ npm test
 npm run build
 ```
 
-`npm run build` writes a static site to `dist/` (relative paths, so it works on GitHub Pages or any static host).
+Production builds on GitHub Actions use the `/Process-Mapper/` base path so assets load on GitHub Pages. Local `npm run dev` / `npm run build` keep relative paths.
 
 ## Use
 
@@ -29,8 +31,6 @@ npm run build
 - **Swimlanes:** add a lane, then drop nodes onto it. Drag the coloured label to move the lane. Resize from the edges. Deleting a lane keeps its nodes.
 - **VSM:** select a step and fill lead time (days), process time (minutes), and/or %C&A. Totals and a timeline use **working hours / day** (default 8), not 24-hour days.
 - **Save:** autosaves in this browser. **Save JSON** / `Ctrl+S` downloads a file. **Load** accepts v2 or the old v1 format. **PNG** exports the whole map.
-
-Maps never leave the machine unless you download or host them yourself.
 
 ## Shortcuts
 
