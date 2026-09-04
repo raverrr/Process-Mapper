@@ -5,20 +5,39 @@ import {
   getStraightPath,
   useInternalNode,
   type EdgeProps,
+  type InternalNode,
+  type Position,
 } from '@xyflow/react';
-import { handleIdToPosition, routeBoxes } from '../../lib/edgeRoute';
+import {
+  facingSides,
+  handleCenter,
+  handleIdToPosition,
+  pickHandle,
+  positionToHandleId,
+  routeAnchors,
+  sidePoint,
+} from '../../lib/edgeRoute';
 import type { AppEdge, ProcessNodeData } from '../../types';
 
-function boxOf(node: NonNullable<ReturnType<typeof useInternalNode>>) {
+function boxOf(node: InternalNode) {
   const p = node.internals.positionAbsolute;
   const w = node.measured.width || Number(node.internals.userNode.style?.width) || 160;
   const h = node.measured.height || Number(node.internals.userNode.style?.height) || 80;
   return { x: p.x, y: p.y, w, h };
 }
 
-function anchorsLocked(node: NonNullable<ReturnType<typeof useInternalNode>>): boolean {
+function anchorsLocked(node: InternalNode): boolean {
   const user = node.internals.userNode;
   return user.type === 'process' && Boolean((user.data as ProcessNodeData).lockAnchors);
+}
+
+function anchorOf(node: InternalNode, pos: Position, handleId?: string | null) {
+  const handle = pickHandle(
+    [...(node.internals.handleBounds?.source ?? []), ...(node.internals.handleBounds?.target ?? [])],
+    pos,
+    handleId ?? positionToHandleId(pos),
+  );
+  return handle ? handleCenter(node.internals.positionAbsolute, handle) : sidePoint(boxOf(node), pos);
 }
 
 export function ProcessEdge({
@@ -37,10 +56,15 @@ export function ProcessEdge({
   const targetNode = useInternalNode(target);
   if (!sourceNode || !targetNode) return null;
 
-  const route = routeBoxes(boxOf(sourceNode), boxOf(targetNode), {
-    sourcePos: anchorsLocked(sourceNode) ? handleIdToPosition(sourceHandleId) : undefined,
-    targetPos: anchorsLocked(targetNode) ? handleIdToPosition(targetHandleId) : undefined,
-  });
+  const auto = facingSides(boxOf(sourceNode), boxOf(targetNode));
+  const sourcePos = (anchorsLocked(sourceNode) ? handleIdToPosition(sourceHandleId) : undefined) ?? auto.sourcePos;
+  const targetPos = (anchorsLocked(targetNode) ? handleIdToPosition(targetHandleId) : undefined) ?? auto.targetPos;
+  const route = routeAnchors(
+    anchorOf(sourceNode, sourcePos, anchorsLocked(sourceNode) ? sourceHandleId : positionToHandleId(sourcePos)),
+    anchorOf(targetNode, targetPos, anchorsLocked(targetNode) ? targetHandleId : positionToHandleId(targetPos)),
+    sourcePos,
+    targetPos,
+  );
   const pathKind = data?.path ?? 'smoothstep';
   const params = {
     sourceX: route.sx,
@@ -52,7 +76,7 @@ export function ProcessEdge({
   };
 
   const [path, labelX, labelY] =
-    pathKind === 'straight' || route.axisLocked
+    pathKind === 'straight'
       ? getStraightPath(params)
       : pathKind === 'step'
         ? getSmoothStepPath({ ...params, borderRadius: 0 })

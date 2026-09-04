@@ -12,8 +12,17 @@ export type EdgeRoute = {
   axisLocked: boolean;
 };
 
-/** Stay perfectly straight only when handles are this close on the shared axis. */
-export const ALIGN_TOLERANCE = 3;
+export type HandleAnchor = {
+  id?: string | null;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  position: Position;
+};
+
+/** Collinear handles only. Never used to slide endpoints off the anchors. */
+export const ALIGN_TOLERANCE = 0.5;
 
 export function handleIdToPosition(id?: string | null): Position | undefined {
   if (id === 't') return Position.Top;
@@ -21,6 +30,21 @@ export function handleIdToPosition(id?: string | null): Position | undefined {
   if (id === 'b') return Position.Bottom;
   if (id === 'l') return Position.Left;
   return undefined;
+}
+
+export function positionToHandleId(pos: Position): string {
+  switch (pos) {
+    case Position.Top:
+      return 't';
+    case Position.Right:
+      return 'r';
+    case Position.Bottom:
+      return 'b';
+    case Position.Left:
+      return 'l';
+    default:
+      return 'b';
+  }
 }
 
 export function sidePoint(box: Box, pos: Position): { x: number; y: number } {
@@ -38,6 +62,26 @@ export function sidePoint(box: Box, pos: Position): { x: number; y: number } {
   }
 }
 
+export function handleCenter(origin: { x: number; y: number }, handle: HandleAnchor): { x: number; y: number } {
+  return {
+    x: origin.x + handle.x + handle.width / 2,
+    y: origin.y + handle.y + handle.height / 2,
+  };
+}
+
+export function pickHandle(
+  handles: readonly HandleAnchor[] | undefined,
+  pos: Position,
+  id?: string | null,
+): HandleAnchor | undefined {
+  if (!handles?.length) return undefined;
+  if (id) {
+    const byId = handles.find((handle) => handle.id === id);
+    if (byId) return byId;
+  }
+  return handles.find((handle) => handle.position === pos) ?? handles.find((handle) => handle.id === positionToHandleId(pos));
+}
+
 export function facingSides(a: Box, b: Box): { sourcePos: Position; targetPos: Position } {
   const dx = b.x + b.w / 2 - (a.x + a.w / 2);
   const dy = b.y + b.h / 2 - (a.y + a.h / 2);
@@ -51,6 +95,27 @@ export function facingSides(a: Box, b: Box): { sourcePos: Position; targetPos: P
     : { sourcePos: Position.Left, targetPos: Position.Right };
 }
 
+export function routeAnchors(
+  src: { x: number; y: number },
+  tgt: { x: number; y: number },
+  sourcePos: Position,
+  targetPos: Position,
+): EdgeRoute {
+  const vertical = sourcePos === Position.Top || sourcePos === Position.Bottom;
+  const aligned = vertical
+    ? Math.abs(src.x - tgt.x) <= ALIGN_TOLERANCE
+    : Math.abs(src.y - tgt.y) <= ALIGN_TOLERANCE;
+  return {
+    sx: src.x,
+    sy: src.y,
+    tx: tgt.x,
+    ty: tgt.y,
+    sourcePos,
+    targetPos,
+    axisLocked: aligned,
+  };
+}
+
 export function routeBoxes(
   a: Box,
   b: Box,
@@ -59,42 +124,5 @@ export function routeBoxes(
   const auto = facingSides(a, b);
   const sourcePos = locked.sourcePos ?? auto.sourcePos;
   const targetPos = locked.targetPos ?? auto.targetPos;
-  const src = sidePoint(a, sourcePos);
-  const tgt = sidePoint(b, targetPos);
-  const vertical = sourcePos === Position.Top || sourcePos === Position.Bottom;
-
-  if (vertical && Math.abs(src.x - tgt.x) <= ALIGN_TOLERANCE) {
-    const x = (src.x + tgt.x) / 2;
-    return {
-      sx: x,
-      sy: src.y,
-      tx: x,
-      ty: tgt.y,
-      sourcePos,
-      targetPos,
-      axisLocked: true,
-    };
-  }
-  if (!vertical && Math.abs(src.y - tgt.y) <= ALIGN_TOLERANCE) {
-    const y = (src.y + tgt.y) / 2;
-    return {
-      sx: src.x,
-      sy: y,
-      tx: tgt.x,
-      ty: y,
-      sourcePos,
-      targetPos,
-      axisLocked: true,
-    };
-  }
-
-  return {
-    sx: src.x,
-    sy: src.y,
-    tx: tgt.x,
-    ty: tgt.y,
-    sourcePos,
-    targetPos,
-    axisLocked: false,
-  };
+  return routeAnchors(sidePoint(a, sourcePos), sidePoint(b, targetPos), sourcePos, targetPos);
 }
