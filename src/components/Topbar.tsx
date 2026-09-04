@@ -6,6 +6,7 @@ type Props = {
   canUndo: boolean;
   canRedo: boolean;
   equalSwimlaneWidths: boolean;
+  pngIncludeDetails: boolean;
   onTitle: (value: string) => void;
   onNew: () => void;
   onLoad: () => void;
@@ -16,6 +17,7 @@ type Props = {
   onFit: () => void;
   onHelp: () => void;
   onEqualSwimlaneWidths: (value: boolean) => void;
+  onPngIncludeDetails: (value: boolean) => void;
 };
 
 export function Topbar({
@@ -24,6 +26,7 @@ export function Topbar({
   canUndo,
   canRedo,
   equalSwimlaneWidths,
+  pngIncludeDetails,
   onTitle,
   onNew,
   onLoad,
@@ -34,6 +37,7 @@ export function Topbar({
   onFit,
   onHelp,
   onEqualSwimlaneWidths,
+  onPngIncludeDetails,
 }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
@@ -104,17 +108,32 @@ export function Topbar({
           </button>
           {settingsOpen ? (
             <div className="settings-menu" role="dialog" aria-label="Settings">
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={equalSwimlaneWidths}
-                  onChange={(event) => onEqualSwimlaneWidths(event.target.checked)}
-                />
-                Match swimlane widths
-              </label>
-              <p className="field-hint">
-                All lanes use the longest width. Drag any lane&apos;s edge to resize them together.
-              </p>
+              <div className="settings-item">
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={equalSwimlaneWidths}
+                    onChange={(event) => onEqualSwimlaneWidths(event.target.checked)}
+                  />
+                  Match swimlane widths
+                </label>
+                <p className="field-hint">
+                  All lanes use the longest width. Drag any lane&apos;s edge to resize them together.
+                </p>
+              </div>
+              <div className="settings-item">
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={pngIncludeDetails}
+                    onChange={(event) => onPngIncludeDetails(event.target.checked)}
+                  />
+                  Include node details in PNG
+                </label>
+                <p className="field-hint">
+                  Adds notes, owners, and VSM metrics under the map. Off, the PNG is just the diagram.
+                </p>
+              </div>
             </div>
           ) : null}
         </div>

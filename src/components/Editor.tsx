@@ -91,6 +91,8 @@ export function Editor() {
     setInspectorOpen,
     equalSwimlaneWidths,
     setEqualSwimlaneWidths,
+    pngIncludeDetails,
+    setPngIncludeDetails,
   } = useUiPrefs();
   const fileRef = useRef<HTMLInputElement>(null);
   const clipboard = useRef<{ nodes: AppNode[]; edges: AppEdge[] } | null>(null);
@@ -446,12 +448,12 @@ export function Editor() {
 
   const onPng = useCallback(async () => {
     try {
-      await exportPng(nodes, title);
-      flash('PNG downloaded');
+      await exportPng(nodes, title, { includeDetails: pngIncludeDetails });
+      flash(pngIncludeDetails ? 'PNG downloaded with notes' : 'PNG downloaded');
     } catch (error) {
       flash(error instanceof Error ? error.message : 'Export failed');
     }
-  }, [flash, nodes, title]);
+  }, [flash, nodes, pngIncludeDetails, title]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -596,6 +598,8 @@ export function Editor() {
         onHelp={() => setHelpOpen(true)}
         equalSwimlaneWidths={equalSwimlaneWidths}
         onEqualSwimlaneWidths={setEqualSwimlaneWidths}
+        pngIncludeDetails={pngIncludeDetails}
+        onPngIncludeDetails={setPngIncludeDetails}
       />
       <div
         className={`workspace${paletteOpen ? '' : ' palette-collapsed'}${inspectorOpen ? '' : ' inspector-collapsed'}`}
