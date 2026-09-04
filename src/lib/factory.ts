@@ -1,4 +1,3 @@
-import { MarkerType } from '@xyflow/react';
 import type { XYPosition } from '@xyflow/react';
 import {
   KIND_META,
@@ -9,12 +8,14 @@ import {
 import type {
   AppEdge,
   AppNode,
+  EdgeColor,
   PathKind,
   ProcessKind,
   ProcessNode,
   SwimlaneColor,
   SwimlaneNode,
 } from '../types';
+import { edgeVisuals } from './edgeStyle';
 import { nextId } from './ids';
 
 export function createProcessNode(
@@ -68,9 +69,17 @@ export function createEdge(
     label?: string;
     path?: PathKind;
     dashed?: boolean;
+    color?: EdgeColor;
   } = {},
 ): AppEdge {
   const path = options.path ?? 'smoothstep';
+  const data = {
+    path,
+    label: options.label || undefined,
+    dashed: options.dashed,
+    color: options.color && options.color !== 'default' ? options.color : undefined,
+  };
+  const look = edgeVisuals(data);
   return {
     id: nextId('e'),
     source,
@@ -80,18 +89,9 @@ export function createEdge(
     type: 'process',
     label: options.label || undefined,
     animated: Boolean(options.dashed),
-    style: options.dashed ? { strokeDasharray: '7 5' } : undefined,
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      width: 16,
-      height: 16,
-      color: '#c8c8d4',
-    },
-    data: {
-      path,
-      label: options.label || undefined,
-      dashed: options.dashed,
-    },
+    style: look.style,
+    markerEnd: look.markerEnd,
+    data,
   };
 }
 

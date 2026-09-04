@@ -378,6 +378,7 @@ export function Editor() {
             label: edge.data?.label,
             path: edge.data?.path,
             dashed: edge.data?.dashed,
+            color: edge.data?.color,
           }),
           selected: true,
         },

@@ -17,6 +17,7 @@ import {
   routeAnchors,
   sidePoint,
 } from '../../lib/edgeRoute';
+import { resolveEdgeColor } from '../../lib/edgeStyle';
 import type { AppEdge, ProcessNodeData } from '../../types';
 
 function boxOf(node: InternalNode) {
@@ -85,6 +86,7 @@ export function ProcessEdge({
           : getSmoothStepPath(params);
 
   const text = data?.label || (typeof label === 'string' ? label : undefined);
+  const color = resolveEdgeColor(data?.color);
 
   return (
     <BaseEdge
@@ -101,12 +103,12 @@ export function ProcessEdge({
       }}
       labelBgStyle={{
         fill: '#1b1b24',
-        stroke: selected ? '#c4a7f7' : '#2a2a36',
+        stroke: selected ? color : '#2a2a36',
       }}
       labelBgPadding={[5, 8]}
       labelBgBorderRadius={10}
       markerEnd={markerEnd}
-      style={style}
+      style={{ ...style, stroke: color, strokeWidth: selected ? 2.6 : 1.8 }}
       interactionWidth={20}
     />
   );

@@ -1,14 +1,16 @@
 import { useUpdateNodeInternals } from '@xyflow/react';
 import type { Dispatch, SetStateAction } from 'react';
-import { KIND_META, KIND_SIZES, PATH_LABELS } from '../constants';
-
+import { EDGE_COLOR_HEX, EDGE_COLOR_LABELS, KIND_META, KIND_SIZES, PATH_LABELS } from '../constants';
+import { edgeVisuals } from '../lib/edgeStyle';
 import { computeVsm, formatDuration, trimNumber } from '../model/vsm';
 import {
+  EDGE_COLORS,
   PATH_KINDS,
   PROCESS_KINDS,
   SWIMLANE_COLORS,
   type AppEdge,
   type AppNode,
+  type EdgeColor,
   type PathKind,
   type ProcessKind,
   type ProcessNode,
@@ -36,6 +38,31 @@ function isProcess(node: AppNode): node is ProcessNode {
 
 function isLane(node: AppNode): node is SwimlaneNode {
   return node.type === 'swimlane';
+}
+
+function ColorSwatches({
+  value,
+  onChange,
+}: {
+  value: EdgeColor | null;
+  onChange: (color: EdgeColor) => void;
+}) {
+  return (
+    <div className="color-swatches" role="radiogroup" aria-label="Connector color">
+      {EDGE_COLORS.map((color) => (
+        <button
+          key={color}
+          type="button"
+          className={`color-swatch${value === color ? ' is-active' : ''}`}
+          style={{ background: EDGE_COLOR_HEX[color] }}
+          title={EDGE_COLOR_LABELS[color]}
+          aria-label={EDGE_COLOR_LABELS[color]}
+          aria-pressed={value === color}
+          onClick={() => onChange(color)}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function Inspector({
@@ -81,22 +108,38 @@ export function Inspector({
     );
   };
 
-  const patchEdge = (id: string, patch: Partial<NonNullable<AppEdge['data']>> & { label?: string }) => {
-    setEdges((eds) =>
-      eds.map((e) => {
-        if (e.id !== id) return e;
-        const data = { ...(e.data ?? { path: 'smoothstep' as PathKind }), ...patch };
-        return {
-          ...e,
-          label: data.label || undefined,
-          type: 'process',
-          animated: Boolean(data.dashed),
-          style: data.dashed ? { strokeDasharray: '7 5' } : undefined,
-          data,
-        };
-      }),
-    );
+  const applyEdgeData = (edge: AppEdge, patch: Partial<NonNullable<AppEdge['data']>>) => {
+    const data: NonNullable<AppEdge['data']> = { ...(edge.data ?? { path: 'smoothstep' }), ...patch };
+    if (patch.color === 'default') {
+      delete data.color;
+    }
+    const look = edgeVisuals(data);
+    return {
+      ...edge,
+      label: data.label || undefined,
+      type: 'process' as const,
+      animated: Boolean(data.dashed),
+      style: look.style,
+      markerEnd: look.markerEnd,
+      data,
+    };
   };
+
+  const patchEdge = (id: string, patch: Partial<NonNullable<AppEdge['data']>> & { label?: string }) => {
+    setEdges((eds) => eds.map((e) => (e.id === id ? applyEdgeData(e, patch) : e)));
+  };
+
+  const colorSelectedEdges = (color: EdgeColor) => {
+    takeSnapshot();
+    const ids = new Set(selectedEdges.map((item) => item.id));
+    setEdges((eds) => eds.map((e) => (ids.has(e.id) ? applyEdgeData(e, { color }) : e)));
+  };
+
+  const sharedEdgeColor: EdgeColor | null =
+    selectedEdges.length > 0 &&
+    selectedEdges.every((item) => (item.data?.color ?? 'default') === (selectedEdges[0].data?.color ?? 'default'))
+      ? (selectedEdges[0].data?.color ?? 'default')
+      : null;
 
   return (
     <aside className="inspector">
@@ -279,6 +322,17 @@ export function Inspector({
               onChange={(e) => patchEdge(edge.id, { label: e.target.value })}
             />
           </label>
+          <div className="field">
+            <span>Color</span>
+            <ColorSwatches
+              value={edge.data?.color ?? 'default'}
+              onChange={(color) => {
+                takeSnapshot();
+                patchEdge(edge.id, { color });
+              }}
+            />
+          </div>
+          <p className="field-hint">Paint a path through a busy map. Default is the usual grey.</p>
           <label className="field">
             <span>Path</span>
             <select
@@ -315,6 +369,12 @@ export function Inspector({
             {selectedNodes.length} node{selectedNodes.length === 1 ? '' : 's'}, {selectedEdges.length}{' '}
             connector{selectedEdges.length === 1 ? '' : 's'}.
           </p>
+          {selectedEdges.length > 0 ? (
+            <div className="field">
+              <span>Connector color</span>
+              <ColorSwatches value={sharedEdgeColor} onChange={colorSelectedEdges} />
+            </div>
+          ) : null}
           <button type="button" className="btn danger" onClick={onDeleteSelected}>
             Delete selected
           </button>

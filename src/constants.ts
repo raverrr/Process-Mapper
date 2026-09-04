@@ -1,4 +1,4 @@
-import type { PathKind, ProcessKind, SwimlaneColor } from './types';
+import type { EdgeColor, PathKind, ProcessKind, SwimlaneColor } from './types';
 
 export const KIND_META: Record<
   ProcessKind,
@@ -88,6 +88,26 @@ export const PATH_LABELS: Record<PathKind, string> = {
   bezier: 'Curve',
   straight: 'Straight',
   step: 'Step',
+};
+
+export const DEFAULT_EDGE_STROKE = '#c8c8d4';
+
+export const EDGE_COLOR_HEX: Record<EdgeColor, string> = {
+  default: DEFAULT_EDGE_STROKE,
+  green: '#66bb6a',
+  blue: '#42a5f5',
+  amber: '#ffca28',
+  orange: '#ff9800',
+  red: '#ef5350',
+};
+
+export const EDGE_COLOR_LABELS: Record<EdgeColor, string> = {
+  default: 'Default',
+  green: 'Green',
+  blue: 'Blue',
+  amber: 'Amber',
+  orange: 'Orange',
+  red: 'Red',
 };
 
 export const DEFAULT_HOURS_PER_DAY = 8;

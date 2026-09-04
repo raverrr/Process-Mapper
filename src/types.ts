@@ -19,6 +19,9 @@ export type SwimlaneColor = (typeof SWIMLANE_COLORS)[number];
 export const PATH_KINDS = ['smoothstep', 'bezier', 'straight', 'step'] as const;
 export type PathKind = (typeof PATH_KINDS)[number];
 
+export const EDGE_COLORS = ['default', 'green', 'blue', 'amber', 'orange', 'red'] as const;
+export type EdgeColor = (typeof EDGE_COLORS)[number];
+
 export type ProcessNodeData = {
   kind: ProcessKind;
   label: string;
@@ -39,6 +42,7 @@ export type ProcessEdgeData = {
   label?: string;
   path: PathKind;
   dashed?: boolean;
+  color?: EdgeColor;
 };
 
 export type ProcessNode = Node<ProcessNodeData, 'process'>;
