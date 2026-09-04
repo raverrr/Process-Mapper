@@ -27,6 +27,7 @@ type Props = {
   setEdges: Dispatch<SetStateAction<AppEdge[]>>;
   takeSnapshot: () => void;
   onDeleteSelected: () => void;
+  onCollapse: () => void;
 };
 
 function isProcess(node: AppNode): node is ProcessNode {
@@ -48,6 +49,7 @@ export function Inspector({
   setEdges,
   takeSnapshot,
   onDeleteSelected,
+  onCollapse,
 }: Props) {
   const updateNodeInternals = useUpdateNodeInternals();
   const selectedNodes = nodes.filter((n) => n.selected);
@@ -57,6 +59,15 @@ export function Inspector({
   const process = selectedNodes.length === 1 && isProcess(selectedNodes[0]) ? selectedNodes[0] : null;
   const lane = selectedNodes.length === 1 && isLane(selectedNodes[0]) ? selectedNodes[0] : null;
   const edge = selectedNodes.length === 0 && selectedEdges.length === 1 ? selectedEdges[0] : null;
+  const heading = process
+    ? 'Node'
+    : lane
+      ? 'Swimlane'
+      : edge
+        ? 'Connector'
+        : selectedNodes.length > 1 || selectedEdges.length > 1
+          ? 'Selection'
+          : 'Map';
 
   const patchProcess = (id: string, patch: Partial<ProcessNode['data']>) => {
     setNodes((nds) =>
@@ -89,9 +100,20 @@ export function Inspector({
 
   return (
     <aside className="inspector">
+      <div className="panel-head">
+        <div className="panel-label">{heading}</div>
+        <button
+          type="button"
+          className="btn ghost pane-toggle"
+          onClick={onCollapse}
+          title="Hide inspector (])"
+          aria-label="Hide inspector"
+        >
+          ›
+        </button>
+      </div>
       {process ? (
         <>
-          <div className="panel-label">Node</div>
           <label className="field">
             <span>Type</span>
             <select
@@ -203,7 +225,7 @@ export function Inspector({
         </>
       ) : lane ? (
         <>
-          <div className="panel-label">Swimlane</div>
+
           <label className="field">
             <span>Label</span>
             <input
@@ -233,7 +255,7 @@ export function Inspector({
         </>
       ) : edge ? (
         <>
-          <div className="panel-label">Connector</div>
+
           <label className="field">
             <span>Label</span>
             <input
@@ -274,7 +296,7 @@ export function Inspector({
         </>
       ) : selectedNodes.length > 1 || selectedEdges.length > 1 ? (
         <>
-          <div className="panel-label">Selection</div>
+
           <p className="field-hint">
             {selectedNodes.length} node{selectedNodes.length === 1 ? '' : 's'}, {selectedEdges.length}{' '}
             connector{selectedEdges.length === 1 ? '' : 's'}.
@@ -285,7 +307,7 @@ export function Inspector({
         </>
       ) : (
         <>
-          <div className="panel-label">Map</div>
+
           <label className="field">
             <span>Title</span>
             <input value={title} onFocus={takeSnapshot} onChange={(e) => setTitle(e.target.value)} />

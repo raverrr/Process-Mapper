@@ -6,12 +6,24 @@ type Props = {
   pendingKind: ProcessKind | 'swimlane' | null;
   onPick: (kind: ProcessKind | 'swimlane') => void;
   onDragStart: (kind: ProcessKind | 'swimlane') => void;
+  onCollapse: () => void;
 };
 
-export function Palette({ pendingKind, onPick, onDragStart }: Props) {
+export function Palette({ pendingKind, onPick, onDragStart, onCollapse }: Props) {
   return (
     <aside className="palette">
-      <div className="panel-label">Nodes</div>
+      <div className="panel-head">
+        <div className="panel-label">Nodes</div>
+        <button
+          type="button"
+          className="btn ghost pane-toggle"
+          onClick={onCollapse}
+          title="Hide nodes pane ([)"
+          aria-label="Hide nodes pane"
+        >
+          ‹
+        </button>
+      </div>
       <div className="palette-list">
         {PROCESS_KINDS.map((kind) => {
           const meta = KIND_META[kind];

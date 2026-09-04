@@ -31,6 +31,7 @@ Production builds on GitHub Actions use the `/Process-Mapper/` base path so asse
 - **Swimlanes:** add a lane, then drop nodes onto it. Drag the coloured label to move the lane. Resize from the edges. Deleting a lane keeps its nodes.
 - **VSM:** select a step and fill lead time (days), process time (minutes), and/or %C&A. Totals and a timeline use **working hours / day** (default 8), not 24-hour days.
 - **Save:** autosaves in this browser. **Save JSON** / `Ctrl+S` downloads a file. **Load** accepts v2 or the old v1 format. **PNG** exports the whole map.
+- **Panes:** collapse Nodes or Inspector with the chevron, or `[` / `]`. Tabs on the canvas edges bring them back.
 
 ## Shortcuts
 
@@ -40,6 +41,7 @@ Production builds on GitHub Actions use the `/Process-Mapper/` base path so asse
 | `Ctrl/Cmd + S` | Download JSON |
 | `Ctrl/Cmd + C` / `V` / `D` | Copy / paste / duplicate |
 | `Delete` | Delete selected |
+| `[` / `]` | Show / hide nodes pane / inspector |
 | `Esc` | Cancel / deselect |
 | `?` | Shortcut list |
 

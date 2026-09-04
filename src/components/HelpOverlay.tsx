@@ -12,6 +12,8 @@ const SHORTCUTS = [
   ['Ctrl/Cmd + D', 'Duplicate'],
   ['Ctrl/Cmd + C / V', 'Copy / paste'],
   ['1', 'Fit view'],
+  ['[', 'Show / hide nodes pane'],
+  [']', 'Show / hide inspector'],
   ['Esc', 'Cancel stamp mode / deselect'],
   ['?', 'This help'],
 ];

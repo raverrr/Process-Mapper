@@ -92,6 +92,7 @@ export const PATH_LABELS: Record<PathKind, string> = {
 
 export const DEFAULT_HOURS_PER_DAY = 8;
 export const STORAGE_KEY = 'process-mapper.current';
+export const UI_STORAGE_KEY = 'process-mapper.ui';
 export const SNAP_GRID: [number, number] = [8, 8];
 export const SWIMLANE_WIDTH = 1600;
 export const SWIMLANE_HEIGHT = 220;

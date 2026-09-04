@@ -22,6 +22,7 @@ import {
 import { useCallback, useEffect, useRef, useState, type DragEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { KIND_META, SNAP_GRID } from '../constants';
 import { useHistory, type Snapshot } from '../hooks/useHistory';
+import { useUiPrefs } from '../hooks/useUiPrefs';
 import { createEdge, createProcessNode, createSwimlaneNode } from '../lib/factory';
 import { exportPng } from '../lib/exportImage';
 import { downloadText } from '../lib/download';
@@ -78,6 +79,7 @@ export function Editor() {
   const [helperLines, setHelperLines] = useState<HelperLines>({});
   const [status, setStatus] = useState(loadAutosave() ? 'Restored local draft' : '');
   const [helpOpen, setHelpOpen] = useState(false);
+  const { paletteOpen, setPaletteOpen, inspectorOpen, setInspectorOpen } = useUiPrefs();
   const fileRef = useRef<HTMLInputElement>(null);
   const clipboard = useRef<{ nodes: AppNode[]; edges: AppEdge[] } | null>(null);
   const dragKind = useRef<ProcessKind | 'swimlane' | null>(null);
@@ -426,6 +428,16 @@ export function Editor() {
         void fitView({ padding: 0.2 });
         return;
       }
+      if (event.key === '[' && !typing && !meta) {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+        return;
+      }
+      if (event.key === ']' && !typing && !meta) {
+        event.preventDefault();
+        setInspectorOpen((open) => !open);
+        return;
+      }
       if ((event.key === 'Delete' || event.key === 'Backspace') && !typing) {
         snap();
         return;
@@ -464,7 +476,9 @@ export function Editor() {
     onSave,
     pasteClipboard,
     setEdges,
+    setInspectorOpen,
     setNodes,
+    setPaletteOpen,
     snap,
   ]);
 
@@ -499,7 +513,9 @@ export function Editor() {
         onFit={() => void fitView({ padding: 0.2 })}
         onHelp={() => setHelpOpen(true)}
       />
-      <div className="workspace">
+      <div
+        className={`workspace${paletteOpen ? '' : ' palette-collapsed'}${inspectorOpen ? '' : ' inspector-collapsed'}`}
+      >
         <Palette
           pendingKind={pendingKind}
           onPick={(kind) => {
@@ -513,8 +529,29 @@ export function Editor() {
           onDragStart={(kind) => {
             dragKind.current = kind;
           }}
+          onCollapse={() => setPaletteOpen(false)}
         />
         <div className="canvas-wrap">
+          {paletteOpen ? null : (
+            <button
+              type="button"
+              className="pane-tab pane-tab-left"
+              onClick={() => setPaletteOpen(true)}
+              title="Show nodes pane ([)"
+            >
+              Nodes
+            </button>
+          )}
+          {inspectorOpen ? null : (
+            <button
+              type="button"
+              className="pane-tab pane-tab-right"
+              onClick={() => setInspectorOpen(true)}
+              title="Show inspector (])"
+            >
+              Inspector
+            </button>
+          )}
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -592,6 +629,7 @@ export function Editor() {
           setEdges={setEdges}
           takeSnapshot={snap}
           onDeleteSelected={onDeleteSelected}
+          onCollapse={() => setInspectorOpen(false)}
         />
       </div>
       <input

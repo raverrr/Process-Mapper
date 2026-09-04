@@ -150,6 +150,19 @@ textarea {
   display: grid;
   grid-template-columns: 228px minmax(0, 1fr) 280px;
   min-height: 0;
+  transition: grid-template-columns 0.18s ease;
+}
+
+.workspace.palette-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) 280px;
+}
+
+.workspace.inspector-collapsed {
+  grid-template-columns: 228px minmax(0, 1fr) 0;
+}
+
+.workspace.palette-collapsed.inspector-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
 }
 
 .palette,
@@ -159,11 +172,75 @@ textarea {
   overflow: auto;
   padding: 12px;
   min-height: 0;
+  min-width: 0;
 }
 
 .inspector {
   border-right: none;
   border-left: 1px solid var(--border);
+}
+
+.workspace.palette-collapsed .palette,
+.workspace.inspector-collapsed .inspector {
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.panel-head .panel-label {
+  margin: 0;
+}
+
+.pane-toggle {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.pane-tab {
+  position: absolute;
+  top: 52px;
+  z-index: 20;
+  writing-mode: vertical-rl;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 6px;
+  cursor: pointer;
+}
+
+.pane-tab:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.pane-tab-left {
+  left: 0;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  transform: rotate(180deg);
+}
+
+.pane-tab-right {
+  right: 0;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
 }
 
 .panel-label {
@@ -647,23 +724,19 @@ textarea {
 
 @media (max-width: 960px) {
   .workspace {
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 200px minmax(0, 1fr) 240px;
   }
 
-  .inspector {
-    display: none;
+  .workspace.palette-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr) 240px;
   }
 
-  .palette-copy,
-  .palette-hint,
-  .panel-label {
-    display: none;
+  .workspace.inspector-collapsed {
+    grid-template-columns: 200px minmax(0, 1fr) 0;
   }
 
-  .palette-item {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 8px 4px;
+  .workspace.palette-collapsed.inspector-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr) 0;
   }
 
   .topbar {
