@@ -688,18 +688,38 @@ textarea {
 }
 
 .react-flow__handle {
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  opacity: 1;
+  pointer-events: all;
+  z-index: 4;
+}
+
+.react-flow__handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 8px;
   height: 8px;
+  border-radius: 50%;
   background: var(--accent);
   border: 2px solid #0e0e12;
+  transform: translate(-50%, -50%);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.12s ease;
 }
 
-.react-flow__node:hover .react-flow__handle,
-.react-flow__node.selected .react-flow__handle,
-.react-flow__handle-connecting,
-.react-flow__handle-valid {
+.react-flow__node:hover .react-flow__handle::after,
+.react-flow__node.selected .react-flow__handle::after,
+.react-flow__handle.connectingfrom::after,
+.react-flow__handle.connectingto::after,
+.react-flow__handle-connecting::after,
+.react-flow__handle-valid::after {
   opacity: 1;
 }
 

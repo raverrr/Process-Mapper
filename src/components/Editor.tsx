@@ -606,7 +606,7 @@ export function Editor() {
             edgeTypes={edgeTypes}
             connectionMode={ConnectionMode.Loose}
             connectionLineType={ConnectionLineType.SmoothStep}
-            connectionRadius={28}
+            connectionRadius={40}
             minZoom={0.12}
             maxZoom={2.4}
             zoomOnDoubleClick={false}
