@@ -24,6 +24,7 @@ export type ProcessNodeData = {
   label: string;
   notes: string;
   owners: string;
+  lockAnchors?: boolean;
   leadTimeDays?: number;
   processTimeMinutes?: number;
   percentCA?: number;

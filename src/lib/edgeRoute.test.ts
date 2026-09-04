@@ -1,34 +1,43 @@
+import { Position } from '@xyflow/react';
 import { describe, expect, it } from 'vitest';
-import { routeBoxes } from './edgeRoute';
+import { ALIGN_TOLERANCE, routeBoxes } from './edgeRoute';
 
 describe('routeBoxes', () => {
-  it('draws a vertical line when nodes share an x range', () => {
-    const a = { x: 100, y: 40, w: 172, h: 56 };
-    const b = { x: 100, y: 200, w: 180, h: 76 };
+  it('snaps to a vertical line only when handle x values are nearly equal', () => {
+    const a = { x: 100, y: 40, w: 160, h: 56 };
+    const b = { x: 100, y: 200, w: 160, h: 76 };
     const route = routeBoxes(a, b);
     expect(route.axisLocked).toBe(true);
     expect(route.sx).toBe(route.tx);
-    expect(route.sy).toBe(96);
-    expect(route.ty).toBe(200);
-    expect(route.sx).toBe(100 + 172 / 2);
+    expect(route.sx).toBe(180);
+    expect(route.sourcePos).toBe(Position.Bottom);
+    expect(route.targetPos).toBe(Position.Top);
   });
 
-  it('draws a horizontal line when nodes share a y range', () => {
-    const a = { x: 40, y: 80, w: 160, h: 72 };
-    const b = { x: 280, y: 90, w: 160, h: 72 };
+  it('does not stay straight when centers differ by more than the tight tolerance', () => {
+    const a = { x: 100, y: 40, w: 172, h: 56 };
+    const b = { x: 100, y: 200, w: 180, h: 76 };
+    const route = routeBoxes(a, b);
+    expect(Math.abs(a.w / 2 - b.w / 2)).toBeGreaterThan(ALIGN_TOLERANCE);
+    expect(route.axisLocked).toBe(false);
+    expect(route.sx).toBe(100 + 172 / 2);
+    expect(route.tx).toBe(100 + 180 / 2);
+  });
+
+  it('still snaps when the offset is within the tight tolerance', () => {
+    const a = { x: 100, y: 40, w: 160, h: 56 };
+    const b = { x: 102, y: 200, w: 160, h: 76 };
     const route = routeBoxes(a, b);
     expect(route.axisLocked).toBe(true);
-    expect(route.sy).toBe(route.ty);
-    expect(route.sx).toBe(200);
-    expect(route.tx).toBe(280);
+    expect(route.sx).toBe(route.tx);
   });
 
-  it('uses facing sides when boxes do not overlap', () => {
+  it('honours a locked source handle instead of auto-facing', () => {
     const a = { x: 0, y: 0, w: 80, h: 80 };
-    const b = { x: 300, y: 300, w: 80, h: 80 };
-    const route = routeBoxes(a, b);
-    expect(route.axisLocked).toBe(false);
+    const b = { x: 200, y: 0, w: 80, h: 80 };
+    const route = routeBoxes(a, b, { sourcePos: Position.Bottom });
+    expect(route.sourcePos).toBe(Position.Bottom);
+    expect(route.sx).toBe(40);
     expect(route.sy).toBe(80);
-    expect(route.ty).toBe(300);
   });
 });

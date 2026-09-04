@@ -6,8 +6,8 @@ import {
   useInternalNode,
   type EdgeProps,
 } from '@xyflow/react';
-import { routeBoxes } from '../../lib/edgeRoute';
-import type { AppEdge } from '../../types';
+import { handleIdToPosition, routeBoxes } from '../../lib/edgeRoute';
+import type { AppEdge, ProcessNodeData } from '../../types';
 
 function boxOf(node: NonNullable<ReturnType<typeof useInternalNode>>) {
   const p = node.internals.positionAbsolute;
@@ -16,10 +16,17 @@ function boxOf(node: NonNullable<ReturnType<typeof useInternalNode>>) {
   return { x: p.x, y: p.y, w, h };
 }
 
+function anchorsLocked(node: NonNullable<ReturnType<typeof useInternalNode>>): boolean {
+  const user = node.internals.userNode;
+  return user.type === 'process' && Boolean((user.data as ProcessNodeData).lockAnchors);
+}
+
 export function ProcessEdge({
   id,
   source,
   target,
+  sourceHandleId,
+  targetHandleId,
   markerEnd,
   style,
   label,
@@ -30,7 +37,10 @@ export function ProcessEdge({
   const targetNode = useInternalNode(target);
   if (!sourceNode || !targetNode) return null;
 
-  const route = routeBoxes(boxOf(sourceNode), boxOf(targetNode));
+  const route = routeBoxes(boxOf(sourceNode), boxOf(targetNode), {
+    sourcePos: anchorsLocked(sourceNode) ? handleIdToPosition(sourceHandleId) : undefined,
+    targetPos: anchorsLocked(targetNode) ? handleIdToPosition(targetHandleId) : undefined,
+  });
   const pathKind = data?.path ?? 'smoothstep';
   const params = {
     sourceX: route.sx,

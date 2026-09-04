@@ -169,6 +169,20 @@ export function Inspector({
               onChange={(e) => patchProcess(process.id, { owners: e.target.value })}
             />
           </label>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={Boolean(process.data.lockAnchors)}
+              onChange={(e) => {
+                takeSnapshot();
+                patchProcess(process.id, { lockAnchors: e.target.checked });
+              }}
+            />
+            Lock connector anchors
+          </label>
+          <p className="field-hint">
+            Keep this node&apos;s edges on the handles you connected. Off, they hop to the nearest side.
+          </p>
           <div className="panel-label">Value stream</div>
           <p className="field-hint">Leave blank to exclude this step from VSM totals.</p>
           <div className="field-row">

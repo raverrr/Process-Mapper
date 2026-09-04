@@ -26,7 +26,7 @@ Production builds on GitHub Actions use the `/Process-Mapper/` base path so asse
 
 - **Zoom / pan:** scroll or pinch to zoom. Drag empty canvas **or a swimlane** to pan. **Space+drag** or **middle-mouse drag** pans over nodes too. **Fit** or `1` frames the map.
 - **Add a node:** drag from the left palette, or click a type then click the canvas.
-- **Connect:** drag from a handle. Drop on another node, or on empty canvas to create a task and connect it.
+- **Connect:** drag from a handle. Drop on another node, or on empty canvas to create a task and connect it. Curve connectors snap to straight only when handles are almost perfectly aligned. Tick **Lock connector anchors** on a node to stop edges hopping to the nearest side.
 - **Rename:** double-click a node.
 - **Swimlanes:** add a lane, then drop nodes onto it. Drag the coloured label to move the lane. Resize from the edges. Deleting a lane keeps its nodes.
 - **VSM:** select a step and fill lead time (days), process time (minutes), and/or %C&A. Totals and a timeline use **working hours / day** (default 8), not 24-hour days.

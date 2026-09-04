@@ -34,6 +34,7 @@ export function createProcessNode(
       label: extras.label ?? KIND_META[kind].defaultName,
       notes: extras.notes ?? '',
       owners: extras.owners ?? '',
+      lockAnchors: extras.lockAnchors,
       leadTimeDays: extras.leadTimeDays,
       processTimeMinutes: extras.processTimeMinutes,
       percentCA: extras.percentCA,

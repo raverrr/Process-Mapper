@@ -12,32 +12,89 @@ export type EdgeRoute = {
   axisLocked: boolean;
 };
 
-const MIN_OVERLAP = 12;
+/** Stay perfectly straight only when handles are this close on the shared axis. */
+export const ALIGN_TOLERANCE = 3;
 
-export function routeBoxes(a: Box, b: Box): EdgeRoute {
-  const acx = a.x + a.w / 2;
-  const acy = a.y + a.h / 2;
-  const bcx = b.x + b.w / 2;
-  const bcy = b.y + b.h / 2;
-  const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-  const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-  const vertical = Math.abs(bcy - acy) >= Math.abs(bcx - acx);
+export function handleIdToPosition(id?: string | null): Position | undefined {
+  if (id === 't') return Position.Top;
+  if (id === 'r') return Position.Right;
+  if (id === 'b') return Position.Bottom;
+  if (id === 'l') return Position.Left;
+  return undefined;
+}
 
-  if (vertical) {
-    const x = overlapX >= MIN_OVERLAP ? Math.max(a.x, b.x) + overlapX / 2 : acx;
-    const locked = overlapX >= MIN_OVERLAP;
-    const tx = locked ? x : bcx;
-    if (acy <= bcy) {
-      return { sx: x, sy: a.y + a.h, tx, ty: b.y, sourcePos: Position.Bottom, targetPos: Position.Top, axisLocked: locked };
-    }
-    return { sx: x, sy: a.y, tx, ty: b.y + b.h, sourcePos: Position.Top, targetPos: Position.Bottom, axisLocked: locked };
+export function sidePoint(box: Box, pos: Position): { x: number; y: number } {
+  switch (pos) {
+    case Position.Top:
+      return { x: box.x + box.w / 2, y: box.y };
+    case Position.Right:
+      return { x: box.x + box.w, y: box.y + box.h / 2 };
+    case Position.Bottom:
+      return { x: box.x + box.w / 2, y: box.y + box.h };
+    case Position.Left:
+      return { x: box.x, y: box.y + box.h / 2 };
+    default:
+      return { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+  }
+}
+
+export function facingSides(a: Box, b: Box): { sourcePos: Position; targetPos: Position } {
+  const dx = b.x + b.w / 2 - (a.x + a.w / 2);
+  const dy = b.y + b.h / 2 - (a.y + a.h / 2);
+  if (Math.abs(dy) >= Math.abs(dx)) {
+    return dy >= 0
+      ? { sourcePos: Position.Bottom, targetPos: Position.Top }
+      : { sourcePos: Position.Top, targetPos: Position.Bottom };
+  }
+  return dx >= 0
+    ? { sourcePos: Position.Right, targetPos: Position.Left }
+    : { sourcePos: Position.Left, targetPos: Position.Right };
+}
+
+export function routeBoxes(
+  a: Box,
+  b: Box,
+  locked: { sourcePos?: Position; targetPos?: Position } = {},
+): EdgeRoute {
+  const auto = facingSides(a, b);
+  const sourcePos = locked.sourcePos ?? auto.sourcePos;
+  const targetPos = locked.targetPos ?? auto.targetPos;
+  const src = sidePoint(a, sourcePos);
+  const tgt = sidePoint(b, targetPos);
+  const vertical = sourcePos === Position.Top || sourcePos === Position.Bottom;
+
+  if (vertical && Math.abs(src.x - tgt.x) <= ALIGN_TOLERANCE) {
+    const x = (src.x + tgt.x) / 2;
+    return {
+      sx: x,
+      sy: src.y,
+      tx: x,
+      ty: tgt.y,
+      sourcePos,
+      targetPos,
+      axisLocked: true,
+    };
+  }
+  if (!vertical && Math.abs(src.y - tgt.y) <= ALIGN_TOLERANCE) {
+    const y = (src.y + tgt.y) / 2;
+    return {
+      sx: src.x,
+      sy: y,
+      tx: tgt.x,
+      ty: y,
+      sourcePos,
+      targetPos,
+      axisLocked: true,
+    };
   }
 
-  const y = overlapY >= MIN_OVERLAP ? Math.max(a.y, b.y) + overlapY / 2 : acy;
-  const locked = overlapY >= MIN_OVERLAP;
-  const ty = locked ? y : bcy;
-  if (acx <= bcx) {
-    return { sx: a.x + a.w, sy: y, tx: b.x, ty, sourcePos: Position.Right, targetPos: Position.Left, axisLocked: locked };
-  }
-  return { sx: a.x, sy: y, tx: b.x + b.w, ty, sourcePos: Position.Left, targetPos: Position.Right, axisLocked: locked };
+  return {
+    sx: src.x,
+    sy: src.y,
+    tx: tgt.x,
+    ty: tgt.y,
+    sourcePos,
+    targetPos,
+    axisLocked: false,
+  };
 }
