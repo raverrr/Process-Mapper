@@ -56,21 +56,23 @@ function ProcessNodeComponent({ id, data, selected }: NodeProps<ProcessNodeType>
         }}
       >
         <Shape kind={data.kind} width={size.w} height={size.h} selected={Boolean(selected)} />
-        <div className="process-node-label">
-          {editing ? (
-            <input
-              ref={inputRef}
-              className="nodrag nopan process-node-input"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commit}
-              onKeyDown={onKey}
-            />
-          ) : (
-            <span>{data.label}</span>
-          )}
+        <div className="process-node-caption">
+          <div className="process-node-label">
+            {editing ? (
+              <input
+                ref={inputRef}
+                className="nodrag nopan process-node-input"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commit}
+                onKeyDown={onKey}
+              />
+            ) : (
+              <span>{data.label}</span>
+            )}
+          </div>
+          {badge ? <div className="process-node-vsm">{badge}</div> : null}
         </div>
-        {badge ? <div className="process-node-vsm">{badge}</div> : null}
         <Handle type="source" position={Position.Top} id="t" />
         <Handle type="source" position={Position.Right} id="r" />
         <Handle type="source" position={Position.Bottom} id="b" />

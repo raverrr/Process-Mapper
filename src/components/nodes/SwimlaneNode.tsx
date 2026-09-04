@@ -8,22 +8,24 @@ function SwimlaneNodeComponent({ data, selected }: NodeProps<SwimlaneNodeType>) 
   const accent = SWIMLANE_ACCENT[data.color];
 
   return (
-    <div
-      className={`swimlane-node${selected ? ' is-selected' : ''}`}
-      style={{
-        background: fill,
-        borderColor: selected ? '#c4a7f7' : 'rgba(255,255,255,0.08)',
-      }}
-    >
+    <div className={`swimlane-node${selected ? ' is-selected' : ''}`}>
       <NodeResizer
         isVisible={selected}
         minWidth={480}
         minHeight={140}
-        lineStyle={{ borderColor: '#c4a7f7' }}
-        handleStyle={{ width: 8, height: 8, background: '#c4a7f7' }}
+        lineStyle={{ borderColor: 'transparent' }}
+        handleStyle={{ width: 22, height: 22, background: 'transparent', border: 'none' }}
       />
-      <div className="swimlane-drag" style={{ background: accent }}>
-        <span>{data.label}</span>
+      <div
+        className="swimlane-body"
+        style={{
+          background: fill,
+          borderColor: selected ? '#c4a7f7' : 'rgba(255,255,255,0.08)',
+        }}
+      >
+        <div className="swimlane-drag" style={{ background: accent }}>
+          <span>{data.label}</span>
+        </div>
       </div>
     </div>
   );

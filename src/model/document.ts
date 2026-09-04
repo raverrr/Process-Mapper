@@ -1,8 +1,35 @@
-import { DEFAULT_HOURS_PER_DAY, STORAGE_KEY } from '../constants';
+import { DEFAULT_HOURS_PER_DAY, KIND_SIZES, STORAGE_KEY } from '../constants';
 import { initialNodes } from '../lib/factory';
 import { sortParentsFirst } from '../lib/geometry';
 import type { AppEdge, AppNode, MapDocument } from '../types';
 import { isV1Map, isV2Map, migrateV1 } from './migrate';
+
+function numericDim(value: unknown, fallback: number): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+export function syncProcessNodeSizes(nodes: AppNode[]): AppNode[] {
+  return nodes.map((node) => {
+    if (node.type !== 'process') return node;
+    const size = KIND_SIZES[node.data.kind];
+    const prevW = numericDim(node.style?.width, size.w);
+    const prevH = numericDim(node.style?.height, size.h);
+    if (prevW === size.w && prevH === size.h) return node;
+    return {
+      ...node,
+      style: { ...node.style, width: size.w, height: size.h },
+      position: {
+        x: node.position.x - (size.w - prevW) / 2,
+        y: node.position.y - (size.h - prevH) / 2,
+      },
+    };
+  });
+}
 
 export function emptyDocument(): MapDocument {
   return {
@@ -42,7 +69,7 @@ export function parseMap(data: unknown): { doc: MapDocument; migratedFromV1: boo
         version: 2,
         title: data.title || 'Untitled Map',
         hoursPerDay: data.hoursPerDay > 0 ? data.hoursPerDay : DEFAULT_HOURS_PER_DAY,
-        nodes: Array.isArray(data.nodes) ? (data.nodes as AppNode[]) : [],
+        nodes: syncProcessNodeSizes(Array.isArray(data.nodes) ? (data.nodes as AppNode[]) : []),
         edges: Array.isArray(data.edges)
           ? (data.edges as AppEdge[]).map((edge) => ({ ...edge, type: 'process' as const }))
           : [],
@@ -52,7 +79,8 @@ export function parseMap(data: unknown): { doc: MapDocument; migratedFromV1: boo
     };
   }
   if (isV1Map(data)) {
-    return { doc: migrateV1(data), migratedFromV1: true };
+    const doc = migrateV1(data);
+    return { doc: { ...doc, nodes: syncProcessNodeSizes(doc.nodes) }, migratedFromV1: true };
   }
   throw new Error('Not a Process Mapper JSON file.');
 }

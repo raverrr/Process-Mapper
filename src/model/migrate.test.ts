@@ -90,4 +90,26 @@ describe('parseMap', () => {
   it('rejects junk', () => {
     expect(() => parseMap({ hello: true })).toThrow(/Not a Process Mapper/);
   });
+
+  it('updates stored event node size while keeping the circle centered', () => {
+    const result = parseMap({
+      version: 2,
+      title: 'Events',
+      hoursPerDay: 8,
+      nodes: [
+        {
+          id: 'n1',
+          type: 'process',
+          position: { x: 100, y: 80 },
+          style: { width: 80, height: 80 },
+          data: { kind: 'event', label: 'Mail', notes: '', owners: '' },
+        },
+      ],
+      edges: [],
+    });
+    const node = result.doc.nodes[0];
+    expect(node.style?.width).toBe(96);
+    expect(node.style?.height).toBe(96);
+    expect(node.position).toEqual({ x: 92, y: 72 });
+  });
 });

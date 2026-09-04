@@ -58,7 +58,7 @@ export const KIND_SIZES: Record<ProcessKind, { w: number; h: number }> = {
   'start-end': { w: 172, h: 56 },
   task: { w: 180, h: 76 },
   decision: { w: 144, h: 144 },
-  event: { w: 80, h: 80 },
+  event: { w: 96, h: 96 },
   'input-output': { w: 184, h: 72 },
   document: { w: 164, h: 88 },
   database: { w: 154, h: 96 },

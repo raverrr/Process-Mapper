@@ -443,11 +443,17 @@ textarea {
   color: #fff;
 }
 
-.process-node-label {
+.process-node-caption {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.process-node-label {
   padding: 10px 14px;
   text-align: center;
   font-size: 12.5px;
@@ -460,6 +466,28 @@ textarea {
 .kind-decision .process-node-label,
 .kind-preparation .process-node-label {
   padding: 18px 22px;
+}
+
+.kind-event .process-node-caption {
+  inset: auto;
+  top: 100%;
+  left: 50%;
+  width: 152px;
+  transform: translateX(-50%);
+  padding-top: 14px;
+  gap: 6px;
+  justify-content: flex-start;
+  pointer-events: auto;
+}
+
+.kind-event .process-node-label {
+  padding: 0 2px;
+  width: 100%;
+  font-size: 12px;
+}
+
+.kind-event .process-node-input {
+  width: 100%;
 }
 
 .process-node-label span {
@@ -496,6 +524,13 @@ textarea {
   pointer-events: none;
 }
 
+.kind-event .process-node-vsm {
+  position: static;
+  left: auto;
+  bottom: auto;
+  transform: none;
+}
+
 .node-toolbar-chip {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -512,18 +547,89 @@ textarea {
 .swimlane-node {
   width: 100%;
   height: 100%;
+  overflow: visible;
+}
+
+.swimlane-body {
+  width: 100%;
+  height: 100%;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
 }
 
-.swimlane-node.is-selected {
+.swimlane-node.is-selected .swimlane-body {
   box-shadow: 0 0 0 1px #c4a7f7;
 }
 
 .react-flow__node-swimlane .swimlane-drag,
 .react-flow__node-swimlane .react-flow__resize-control {
   pointer-events: auto !important;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control {
+  z-index: 6;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line {
+  border-color: transparent;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line.top,
+.react-flow__node-swimlane .react-flow__resize-control.line.bottom {
+  height: 20px;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line.left,
+.react-flow__node-swimlane .react-flow__resize-control.line.right {
+  width: 20px;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line::after {
+  content: '';
+  position: absolute;
+  background: #c4a7f7;
+  pointer-events: none;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line.top::after,
+.react-flow__node-swimlane .react-flow__resize-control.line.bottom::after {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.line.left::after,
+.react-flow__node-swimlane .react-flow__resize-control.line.right::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.handle {
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+}
+
+.react-flow__node-swimlane .react-flow__resize-control.handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #0e0e12;
+  border-radius: 1px;
+  background: #c4a7f7;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .swimlane-drag {
